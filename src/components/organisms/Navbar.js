@@ -1,52 +1,52 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { navData } from '@/data';
-import { Navbar as NavbarV2, theme } from 'ecommerce-mxtech';
-import { useInformation } from '@/store/useInformation';
+import { useCart } from 'ecommerce-mxtech';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { FaShoppingCart } from 'react-icons/fa';
 
-const { useToken } = theme;
-
-const Navbar = () => {
-  const { dataSite } = useInformation();
-  const router = useRouter();
-  const {
-    token: { colorPrimary },
-  } = useToken();
+export default function StickyNavbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const { products } = useCart();
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 0);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <NavbarV2
-      linksProps={{
-        variant: 'underline',
-        align: 'left',
-      }}
-      textColor='black'
-      withLogo={true}
-      imageProps={{
-        src: dataSite.iconImage,
-        className: 'w-28',
-      }}
-      styleTitle={{
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: 'black',
-      }}
-      links={navData}
-      onClickProduct={(product) => {
-        router.push(`/product/${product.id}`);
-      }}
-      buttonCartProps={{
-        onClick: () => router.push('/my-cart'),
-      }}
-      buttonContactProps={{
-        onClick: () => router.push('/more-information'),
-      }}
-      onRedirect={(path) => router.push(path)}
-      styleHeader={{
-        height: 100,
-        color: 'black',
-      }}
-    />
+    <nav
+      className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+        scrolled ? 'bg-black' : 'bg-transparent absolute'
+      }`}
+    >
+      <div className='max-w-7xl mx-auto px-6 py-4 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <span className='text-red-500 text-2xl font-bold'>
+            LACR <span className='text-red-400'>ADMIN</span>
+          </span>
+        </div>
+        <ul className='hidden md:flex gap-6 text-white font-semibold'>
+          <a href='/#services'>Services</a>
+          <a href='/#intro'>About Us</a>
+          <a href='/#benefits'>Benefits</a>
+          <a href='/#products'>Products</a>
+          <a href='/#testimonials'>Testimonials</a>
+        </ul>
+        <div className='flex items-center gap-4'>
+          <Link href={'/my-cart'} className='relative'>
+            <FaShoppingCart className='text-red-500 text-2xl' />
+            <span className='absolute -top-2 -right-2 bg-white text-red-500 text-xs rounded-full px-1'>
+              {products.length}
+            </span>
+          </Link>
+          <button
+            onClick={() => (window.location.href = '/more-information')}
+            className='bg-red-500 text-white px-4 py-2 rounded'
+          >
+            CONTACT US
+          </button>
+        </div>
+      </div>
+    </nav>
   );
-};
-
-export default Navbar;
+}
